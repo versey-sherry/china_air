@@ -2,7 +2,7 @@
 #Pollutant: PM2.5, PM10, SO2, NO2, CO, O3_8h
 #Chinese Air Quality Standard HJ663-2013
 #Outputs are yearly, quarterly, semiannually, and other special periodic assessement
-#Run daily_assessment.R first to get daily mean
+#Run daily_assessment.R first to get daily assessment
 
 setwd("/Users/sherry/Desktop/china_air/data")
 
@@ -73,10 +73,9 @@ pollutant_province_half <- data.frame(id = unique(stations$provinceid))
 #loop through to get the city data
 a = 1
 for (a in 1:length(all_pollutant_city)){
-  air_data <- all_pollutant_city[[a]]
-  trans <- data.frame(t(air_data[2:length(air_data)]))
-  names(trans) <- air_data$id
-  date <- data.frame(rownames(trans))
+  trans <- all_pollutant_city[[a]]
+  date <- data.frame(trans$X)
+  trans <- trans[-1]
   date$year <- apply(date[1], 1, substr, 1, 4)
   date$month <- apply(date[1],1, substr, 5, 6)
   date$quarter <- apply(date[3], 1, quater)

@@ -73,9 +73,15 @@ for (a in 1:10){
 #Output for plotting running average
 b = 1
 for (b in 1:length(pollutants)){
-  write.csv(eval(parse(text = paste(pollutants[b], "city", sep = "_"))),
+  temp_city <- eval(parse(text = paste(pollutants[b], "city", sep = "_")))
+  rownames(temp_city) <- temp_city$id
+  temp_city <- data.frame(t(temp_city[-1]))
+  temp_province <- eval(parse(text = paste(pollutants[b], "province", sep = "_")))
+  rownames(temp_province) <- temp_province$id
+  temp_province <- data.frame(t(temp_province[-1]))
+  write.csv(temp_city,
             paste(pollutants[b], "_city_daily.csv", sep = ""))
-  write.csv(eval(parse(text = paste(pollutants[b], "province", sep = "_"))),
+  write.csv(temp_province,
             paste(pollutants[b], "_province_daily.csv", sep = ""))
   
 }
