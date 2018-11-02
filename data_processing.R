@@ -1,138 +1,10 @@
 #For processing air pollution data downloaded from MEE.
 #Pollutant: PM2.5, PM10, SO2, NO2, CO, O3_8h
 #Chinese Air Quality Standard HJ663-2013
-#Site data download from http://beijingair.sinaapp.com/
-#Sort data in folder by date
+#Outputs are yearly, quarterly, semiannually, and other special periodic assessement
+#Run daily_assessment.R first to get daily mean
 
 setwd("/Users/sherry/Desktop/china_air/data")
-files <- list.files(pattern = "(china_sites_)+.*.csv")
-stations <- read.csv("/Users/sherry/Desktop/china_air/match1.csv", stringsAsFactors = FALSE)
-
-#generate city/province reference to propergate data frame from station list
-pm25_city <- data.frame(id = unique(stations$cityid))
-pm10_city <- data.frame(id = unique(stations$cityid))
-so2_city <- data.frame(id = unique(stations$cityid))
-no2_city <- data.frame(id = unique(stations$cityid))
-o3_city <- data.frame(id = unique(stations$cityid))
-co_city <- data.frame(id = unique(stations$cityid))
-pm25_province <- data.frame(id = unique(stations$provinceid))
-pm10_province <- data.frame(id = unique(stations$provinceid))
-so2_province <- data.frame(id = unique(stations$provinceid))
-no2_province <- data.frame(id = unique(stations$provinceid))
-o3_province <- data.frame(id = unique(stations$provinceid))
-co_province <- data.frame(id = unique(stations$provinceid))
-
-#read air pollution data and process to day level
-a = 1
-for (a in 1:length(files)){
-  air_data <- read.csv(files[a], stringsAsFactors = FALSE)
-  date <- as.character(unique(air_data$date))
-  #pm2.5
-  pollution <- air_data[air_data$type == "PM2.5", ]
-  pollution <- pollution[c(-1, -2, -3)]
-  pollution_mean <- apply(pollution, 2, mean, na.rm = TRUE)
-  #Check if there are more than 21 valid data entry per day.
-  # check_21 <- pollution
-  # check_21 <- !is.na(check_21)
-  # check_21 <- apply(check_21, 2, sum)
-  # check_21 <- check_21 >= 21
-  # pollution_mean <- data.frame(pollution_mean * check_21)
-  pollution_mean <- data.frame(pollution_mean)
-  names(pollution_mean) <- date
-  pollution_mean$id <- row.names(pollution_mean)
-  pollution_mean <- merge(stations, pollution_mean, by.x = "id", by.y = "id", all.x = FALSE, all.y = TRUE)
-  pollution_city <- aggregate(pollution_mean[6], by = list(pollution_mean$cityid), mean, na.rm = TRUE)
-  pollution_province <- aggregate(pollution_mean[6], by = list(pollution_mean$provinceid), mean, na.rm = TRUE)
-  pm25_city <- merge(pm25_city, pollution_city, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  pm25_province <- merge(pm25_province, pollution_province, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  #pm10
-  pollution <- air_data[air_data$type == "PM10", ]
-  pollution <- pollution[c(-1, -2, -3)]
-  pollution_mean <- apply(pollution, 2, mean, na.rm = TRUE)
-  # check_21 <- pollution
-  # check_21 <- !is.na(check_21)
-  # check_21 <- apply(check_21, 2, sum)
-  # check_21 <- check_21 >= 21
-  # pollution_mean <- data.frame(pollution_mean * check_21)
-  pollution_mean <- data.frame(pollution_mean)
-  names(pollution_mean) <- date
-  pollution_mean$id <- row.names(pollution_mean)
-  pollution_mean <- merge(stations, pollution_mean, by.x = "id", by.y = "id", all.x = FALSE, all.y = TRUE)
-  pollution_city <- aggregate(pollution_mean[6], by = list(pollution_mean$cityid), mean, na.rm = TRUE)
-  pollution_province <- aggregate(pollution_mean[6], by = list(pollution_mean$provinceid), mean, na.rm = TRUE)
-  pm10_city <- merge(pm10_city, pollution_city, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  pm10_province <- merge(pm10_province, pollution_province, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  #so2
-  pollution <- air_data[air_data$type == "SO2", ]
-  pollution <- pollution[c(-1, -2, -3)]
-  pollution_mean <- apply(pollution, 2, mean, na.rm = TRUE)
-  # check_21 <- pollution
-  # check_21 <- !is.na(check_21)
-  # check_21 <- apply(check_21, 2, sum)
-  # check_21 <- check_21 >= 21
-  # pollution_mean <- data.frame(pollution_mean * check_21)
-  pollution_mean <- data.frame(pollution_mean)
-  names(pollution_mean) <- date
-  pollution_mean$id <- row.names(pollution_mean)
-  pollution_mean <- merge(stations, pollution_mean, by.x = "id", by.y = "id", all.x = FALSE, all.y = TRUE)
-  pollution_city <- aggregate(pollution_mean[6], by = list(pollution_mean$cityid), mean, na.rm = TRUE)
-  pollution_province <- aggregate(pollution_mean[6], by = list(pollution_mean$provinceid), mean, na.rm = TRUE)
-  so2_city <- merge(so2_city, pollution_city, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  so2_province <- merge(so2_province, pollution_province, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  #no2
-  pollution <- air_data[air_data$type == "NO2", ]
-  pollution <- pollution[c(-1, -2, -3)]
-  pollution_mean <- apply(pollution, 2, mean, na.rm = TRUE)
-  # check_21 <- pollution
-  # check_21 <- !is.na(check_21)
-  # check_21 <- apply(check_21, 2, sum)
-  # check_21 <- check_21 >= 21
-  # pollution_mean <- data.frame(pollution_mean * check_21)
-  pollution_mean <- data.frame(pollution_mean)
-  names(pollution_mean) <- date
-  pollution_mean$id <- row.names(pollution_mean)
-  pollution_mean <- merge(stations, pollution_mean, by.x = "id", by.y = "id", all.x = FALSE, all.y = TRUE)
-  pollution_city <- aggregate(pollution_mean[6], by = list(pollution_mean$cityid), mean, na.rm = TRUE)
-  pollution_province <- aggregate(pollution_mean[6], by = list(pollution_mean$provinceid), mean, na.rm = TRUE)
-  no2_city <- merge(no2_city, pollution_city, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  no2_province <- merge(no2_province, pollution_province, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  #co
-  pollution <- air_data[air_data$type == "CO", ]
-  pollution <- pollution[c(-1, -2, -3)]
-  pollution_mean <- apply(pollution, 2, mean, na.rm = TRUE)
-  # check_21 <- pollution
-  # check_21 <- !is.na(check_21)
-  # check_21 <- apply(check_21, 2, sum)
-  # check_21 <- check_21 >= 21
-  # pollution_mean <- data.frame(pollution_mean * check_21)
-  pollution_mean <- data.frame(pollution_mean)
-  names(pollution_mean) <- date
-  pollution_mean$id <- row.names(pollution_mean)
-  pollution_mean <- merge(stations, pollution_mean, by.x = "id", by.y = "id", all.x = FALSE, all.y = TRUE)
-  pollution_city <- aggregate(pollution_mean[6], by = list(pollution_mean$cityid), mean, na.rm = TRUE)
-  pollution_province <- aggregate(pollution_mean[6], by = list(pollution_mean$provinceid), mean, na.rm = TRUE)
-  co_city <- merge(co_city, pollution_city, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  co_province <- merge(co_province, pollution_province, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  #O3
-  pollution <- air_data[air_data$type == "O3_8h", ]
-  pollution <- pollution[c(-1, -2, -3)]
-  pollution[is.na(pollution)] <- 0
-  pollution_mean <- apply(pollution, 2, max)
-  # check_21 <- pollution
-  # check_21 <- !is.na(check_21)
-  # check_21 <- apply(check_21, 2, sum)
-  # check_21 <- check_21 >= 21
-  # pollution_mean <- data.frame(pollution_mean * check_21)
-  pollution_mean <- data.frame(pollution_mean)
-  names(pollution_mean) <- date
-  pollution_mean$id <- row.names(pollution_mean)
-  pollution_mean <- merge(stations, pollution_mean, by.x = "id", by.y = "id", all.x = FALSE, all.y = TRUE)
-  pollution_city <- aggregate(pollution_mean[6], by = list(pollution_mean$cityid), mean, na.rm = TRUE)
-  pollution_province <- aggregate(pollution_mean[6], by = list(pollution_mean$provinceid), mean, na.rm = TRUE)
-  o3_city <- merge(o3_city, pollution_city, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  o3_province <- merge(o3_province, pollution_province, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE)
-  a = a + 1
-}
 
 #There are functions for generating date from %Y%m%d date type but since special month period is required
 #date is processed through string operations and new functions
@@ -180,9 +52,15 @@ ozone49 <- function(x){
   return(b)
 }
 
-all_pollutant_city <- list(pm25_city, pm10_city, so2_city, no2_city, co_city, o3_city)
-all_pollutant_province <- list(pm25_province, pm10_province, so2_province, no2_province, co_province, o3_province)
-all_pollutant_str <- c("PM2.5", "PM10", "SO2", "NO2", "CO", "O3")
+files <- list.files(pattern = ".*(_daily)+.csv")
+a = 1
+for (a in 1:length(files)){
+  assign(gsub("_daily.csv", "", files[a]), read.csv(files[a]))
+  a = a+1
+}
+
+all_pollutant_city <- list(PM2.5_city, PM10_city, SO2_city, NO2_city, CO_city, O3_city)
+all_pollutant_province <- list(PM2.5_province, PM10_province, SO2_province, NO2_province, CO_province, O3_province)
 pollutant_city_year <- data.frame(id = unique(stations$cityid))
 pollutant_city_month <- data.frame(id = unique(stations$cityid))
 pollutant_city_quarter <- data.frame(id = unique(stations$cityid))
@@ -211,7 +89,7 @@ for (a in 1:length(all_pollutant_city)){
   
   #year
   year <- aggregate(trans[5:length(trans)], list(trans$year), mean, na.rm = TRUE)
-  date <- paste(year$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(year$Group.1, pollutants[a], sep = "_")
   year <- year[-1]
   year <- data.frame(t(year))
   colnames(year) <- date
@@ -220,7 +98,7 @@ for (a in 1:length(all_pollutant_city)){
   
   #month
   month <- aggregate(trans[5:length(trans)], list(trans$month), mean, na.rm = TRUE)
-  date <- paste(month$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(month$Group.1, pollutants[a], sep = "_")
   month <- month[-1]
   month <- data.frame(t(month))
   colnames(month) <- date
@@ -229,7 +107,7 @@ for (a in 1:length(all_pollutant_city)){
   
   #quarter
   quarter <- aggregate(trans[5:length(trans)], list(trans$quarter), mean, na.rm = TRUE)
-  date <- paste(quarter$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(quarter$Group.1, pollutants[a], sep = "_")
   quarter <- quarter[-1]
   quarter <- data.frame(t(quarter))
   colnames(quarter) <- date
@@ -238,7 +116,7 @@ for (a in 1:length(all_pollutant_city)){
   
   #half
   half <- aggregate(trans[5:length(trans)], list(trans$half), mean, na.rm = TRUE)
-  date <- paste(half$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(half$Group.1, pollutants[a], sep = "_")
   half <- half[-1]
   half <- data.frame(t(half))
   colnames(half) <- date
@@ -266,7 +144,7 @@ for (a in 1:length(all_pollutant_province)){
   
   #year
   year <- aggregate(trans[5:length(trans)], list(trans$year), mean, na.rm = TRUE)
-  date <- paste(year$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(year$Group.1, pollutants[a], sep = "_")
   year <- year[-1]
   year <- data.frame(t(year))
   colnames(year) <- date
@@ -275,7 +153,7 @@ for (a in 1:length(all_pollutant_province)){
   
   #month
   month <- aggregate(trans[5:length(trans)], list(trans$month), mean, na.rm = TRUE)
-  date <- paste(month$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(month$Group.1, pollutants[a], sep = "_")
   month <- month[-1]
   month <- data.frame(t(month))
   colnames(month) <- date
@@ -284,7 +162,7 @@ for (a in 1:length(all_pollutant_province)){
   
   #quarter
   quarter <- aggregate(trans[5:length(trans)], list(trans$quarter), mean, na.rm = TRUE)
-  date <- paste(quarter$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(quarter$Group.1, pollutants[a], sep = "_")
   quarter <- quarter[-1]
   quarter <- data.frame(t(quarter))
   colnames(quarter) <- date
@@ -293,7 +171,7 @@ for (a in 1:length(all_pollutant_province)){
   
   #half
   half <- aggregate(trans[5:length(trans)], list(trans$half), mean, na.rm = TRUE)
-  date <- paste(half$Group.1, all_pollutant_str[a], sep = "_")
+  date <- paste(half$Group.1, pollutants[a], sep = "_")
   half <- half[-1]
   half <- data.frame(t(half))
   colnames(half) <- date
