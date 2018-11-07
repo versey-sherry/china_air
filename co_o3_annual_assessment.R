@@ -43,5 +43,6 @@ for (a in 1:length(raw_data)){
     b = b+1
   }
   names(annual) <- names(trans)
+  annual <- data.frame(t(annual))
   write.csv(annual, paste(names[a], ".csv", sep = ""))
   }

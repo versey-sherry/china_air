@@ -58,6 +58,8 @@ for (a in 1:length(files)){
   assign(gsub("_daily.csv", "", files[a]), read.csv(files[a]))
   a = a+1
 }
+stations <- read.csv("/Users/sherry/Desktop/china_air/match1.csv", stringsAsFactors = FALSE)
+pollutants <- c("PM2.5_city", "PM10_city", "SO2_city", "NO2_city", "CO_city", "O3_city")
 
 all_pollutant_city <- list(PM2.5_city, PM10_city, SO2_city, NO2_city, CO_city, O3_city)
 all_pollutant_province <- list(PM2.5_province, PM10_province, SO2_province, NO2_province, CO_province, O3_province)
