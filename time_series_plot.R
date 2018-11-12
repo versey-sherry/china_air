@@ -94,8 +94,9 @@ month_moving <- melt(month_moving, id.vars = c("Date", "Area"), measure.vars = p
   filter(., Area %in% c("JJJ", "PRD", "YRD", "Fenwei") & !is.na(value))
 
 #Set up the periodic highlights according to policies
-highlight <- data.frame(x1 = as.Date("2017-11-15"), x2 = as.Date("2018-03-15"), 
-                         y1 = -Inf, y2 = +Inf, period = "Winter Action Plan")
+highlight <- data.frame(x1 = c(as.Date("2017-11-15"), as.Date("2018-10-01")), 
+                        x2 = c(as.Date("2018-03-15"), as.Date("2019-03-31")), 
+                         y1 = c(-Inf, -Inf), y2 = c(+Inf, +Inf), period = "Winter Action Plan")
 
 #plots with period highlight
 ggplot() +
@@ -112,19 +113,57 @@ ggplot() +
   facet_wrap(~ variable, scales = "free") +
   theme(legend.position = "bottom")
 
+####Yearly running average analysis###
+temp <- eval(parse(text = paste(pollutants[1], "_policy", sep = "")))
+year_moving <- temp %>% select(X, variable, mean_year)
+
+a = 2
+for (a in 2:length(pollutants)){
+  temp <- eval(parse(text = paste(pollutants[a], "_policy", sep = "")))
+  year_moving <- temp %>% select(X, variable, mean_year) %>% left_join(., year_moving, by = c("X", "variable"))
+}
+names(year_moving) <- c("Date", "Area", rev(pollutants))
+
+#change it to long format for plotting
+#ggplot doesn't support pipe inside ggplot arguement so subsetting data happens in data manipulation
+year_moving <- melt(year_moving, id.vars = c("Date", "Area"), measure.vars = pollutants) %>%
+  tibble::as.tibble() %>% 
+  #subset the needed plots
+  filter(., Area %in% c("JJJ", "PRD", "YRD", "Fenwei") & !is.na(value))
+
+#plots with period highlight
+ggplot() +
+  #plotting pollution line
+  geom_line(data = year_moving,
+            aes(x = Date, y = value, color = Area)) +
+  #plotting policy period
+  geom_rect(data = highlight, 
+            mapping = aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2, fill = period), 
+            color = NA, alpha = 0.5) +
+  labs(title = "JJJ PRD YRD Fenwei", subtitle = "365 Day Moving Average") +
+  scale_color_manual(values = wes_palette("Darjeeling1", 6, type = "continuous")) + 
+  theme_tq() + 
+  facet_wrap(~ variable, scales = "free") +
+  theme(legend.position = "bottom")
+
 #year on year monthly moving average for PM2.5
-month_moving <- month_moving %>% 
+test <- month_moving %>% 
   filter(., variable == "PM2.5") %>% 
   select(Date, Area, value) %>%
-  mutate(year = year(Date),
-         plotdate = strftime(Date, format = "%j")) %>%
+  mutate(year = factor(year(Date)),
+         plotdate = as.Date(paste("2014", month(Date), day(Date), sep = "-"))) %>%
   select(plotdate, year, Area, value)
 
-  ggplot(data = month_moving, aes(x = plotdate, y = value, color = year)) + 
+  ggplot(data = test, aes(x = plotdate, y = value, color = year)) + 
   geom_line() +
-  labs(title = "JJJ PRD YRD Fenwei", subtitle = "PM2.5 30 Day Moving Average") +
-  #scale_color_manual(values = wes_palette("Darjeeling1", 5, type = "continuous")) + 
-  #theme_tq() + 
+  scale_x_date(date_labels = "%b") + 
+  labs(title = "JJJ PRD YRD Fenwei", subtitle = "PM2.5 30 Day Moving Average by year") +
+  scale_color_manual(values = wes_palette("Darjeeling1", 5, type = "continuous")) + 
+  theme_tq() + 
   facet_wrap(~ Area, scales = "free") +
   theme(legend.position = "bottom")
+
+  #bar plot for pollutant year on year change
+  
+  #subset Ozone for April to August analysis
   
