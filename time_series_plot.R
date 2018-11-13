@@ -13,9 +13,9 @@ library(wesanderson)
 
 setwd("/Users/sherry/Desktop/china_air/data")
 
-#Function for generating plot date
-plot_date <- function(x){
-  return(paste(month(x), day(x), sep = "/"))
+#Function to generate digit in percent form
+percent <- function(x){
+  return(paste(round(x*100, 2), "%", sep = ""))
 }
 
 #read policy related and provincial daily data
@@ -147,14 +147,13 @@ ggplot() +
   theme(legend.position = "bottom")
 
 #year on year monthly moving average for PM2.5
-test <- month_moving %>% 
+month_moving %>% 
   filter(., variable == "PM2.5") %>% 
   select(Date, Area, value) %>%
   mutate(year = factor(year(Date)),
          plotdate = as.Date(paste("2014", month(Date), day(Date), sep = "-"))) %>%
-  select(plotdate, year, Area, value)
-
-  ggplot(data = test, aes(x = plotdate, y = value, color = year)) + 
+  select(plotdate, year, Area, value) %>% 
+  ggplot(., aes(x = plotdate, y = value, color = year)) + 
   geom_line() +
   scale_x_date(date_labels = "%b") + 
   labs(title = "JJJ PRD YRD Fenwei", subtitle = "PM2.5 30 Day Moving Average by year") +
@@ -163,7 +162,83 @@ test <- month_moving %>%
   facet_wrap(~ Area, scales = "free") +
   theme(legend.position = "bottom")
 
-  #bar plot for pollutant year on year change
+#subset Ozone for April to August analysis
+temp <- eval(parse(text = paste(pollutants[1], "_policy", sep = "")))
+ozone_month_moving <- temp %>% select(X, variable, mean_month)
+
+a = 2
+for (a in 2:length(pollutants)){
+  temp <- eval(parse(text = paste(pollutants[a], "_policy", sep = "")))
+  ozone_month_moving <- temp %>% select(X, variable, mean_month) %>% left_join(., ozone_month_moving, by = c("X", "variable"))
+}
+names(ozone_month_moving) <- c("Date", "Area", rev(pollutants))
+
+#change it to long format for plotting
+#ggplot doesn't support pipe inside ggplot arguement so subsetting data happens in data manipulation
+ozone_month_moving <- melt(ozone_month_moving, id.vars = c("Date", "Area"), measure.vars = pollutants) %>%
+  tibble::as.tibble() %>% 
+  #subset the needed plots
+  filter(., variable == "O3", Area %in% c("JJJ", "PRD", "YRD", "Fenwei") & !is.na(value))
+
+#Set up the periodic highlights according to policies
+highlight <- data.frame(x1 = c(as.Date("2016-04-01"), as.Date("2017-04-01"), as.Date("2018-04-01")), 
+                        x2 = c(as.Date("2016-09-30"), as.Date("2017-09-30"), as.Date("2018-09-30")), 
+                        y1 = c(-Inf, -Inf, -Inf), y2 = c(+Inf, +Inf, +Inf), period = "High Ozone")
+
+#plots with period highlight
+ggplot() +
+  #plotting pollution line
+  geom_line(data = ozone_month_moving,
+            aes(x = Date, y = value, color = Area)) +
+  #plotting policy period
+  geom_rect(data = highlight, 
+            mapping = aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2, fill = period), 
+            color = NA, alpha = 0.5) +
+  labs(title = "JJJ PRD YRD Fenwei", subtitle = "Ozone 30 Day Moving Average") +
+  scale_color_manual(values = wes_palette("Darjeeling1", 6, type = "continuous")) + 
+  theme_tq() + 
+  theme(legend.position = "bottom")
+
+#bar plot for pollutant year on year change
+temp <- eval(parse(text = paste(pollutants[1], "_policy", sep = "")))
+year_year <- temp %>% mutate(year = year(X)) %>% 
+  group_by(variable, year) %>% 
+  summarise(year_mean = mean(value, na.rm = TRUE)) %>%
+  group_by(variable) %>%
+  arrange(year, .by_group = TRUE) %>%
+  mutate(p_change = (year_mean/lag(year_mean)) -1) %>%
+  select(variable, year, p_change)
+
+a = 2
+for (a in 2:length(pollutants)){
+  temp <- eval(parse(text = paste(pollutants[a], "_policy", sep = "")))
+  year_year <- temp %>% mutate(year = year(X)) %>% 
+    group_by(variable, year) %>% 
+    summarise(year_mean = mean(value, na.rm = TRUE)) %>%
+    group_by(variable) %>%
+    arrange(year, .by_group = TRUE) %>%
+    mutate(p_change = (year_mean/lag(year_mean)) -1) %>%
+    select(variable, year, p_change) %>%
+    left_join(., year_year, by = c("variable", "year"))
+}
+names(year_year) <- c("Area", "Year", rev(pollutants))
+
+#plot bar chart
+#select needed year
+year_year %>% group_by(Area, Year) %>% 
+  filter(., Year == "2017") %>% 
+  melt(., id.vars = c("Area", "Year"), measure.vars = pollutants) %>%
+  mutate(vjust = ifelse(value >0, -0.25, 0.25)) %>%
+  ggplot(., aes(x = variable, y = value)) +
+  geom_bar(aes(fill = value < 0), stat = "identity") + 
+  scale_fill_manual(guide = FALSE, breaks = c(TRUE, FALSE), 
+                    values = wes_palette("Darjeeling1", 2, type = "continuous")) +
+  labs(title = "All Special Areas", subtitle = "year on year bar plot") +
+  geom_text(aes(label = percent(value), vjust = ifelse(value > 0, -0.25, 1.25)), position =position_dodge(width=0.9)) +
+  theme_tq() + 
+  facet_wrap(~ Area, scales = "free") +
+  theme(legend.position = "bottom")
   
-  #subset Ozone for April to August analysis
-  
+
+
+
