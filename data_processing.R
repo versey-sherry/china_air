@@ -63,6 +63,7 @@ pollutants <- c("PM2.5_city", "PM10_city", "SO2_city", "NO2_city", "CO_city", "O
 
 all_pollutant_city <- list(PM2.5_city, PM10_city, SO2_city, NO2_city, CO_city, O3_city)
 all_pollutant_province <- list(PM2.5_province, PM10_province, SO2_province, NO2_province, CO_province, O3_province)
+
 pollutant_city_year <- data.frame(id = unique(stations$cityid))
 pollutant_city_month <- data.frame(id = unique(stations$cityid))
 pollutant_city_quarter <- data.frame(id = unique(stations$cityid))
@@ -129,10 +130,9 @@ for (a in 1:length(all_pollutant_city)){
 #loop through to get the province data
 a = 1
 for (a in 1:length(all_pollutant_province)){
-  air_data <- all_pollutant_province[[a]]
-  trans <- data.frame(t(air_data[2:length(air_data)]))
-  names(trans) <- air_data$id
-  date <- data.frame(rownames(trans))
+  trans <- all_pollutant_province[[a]]
+  date <- data.frame(trans$X)
+  trans <- trans[-1]
   date$year <- apply(date[1], 1, substr, 1, 4)
   date$month <- apply(date[1],1, substr, 5, 6)
   date$quarter <- apply(date[3], 1, quater)
@@ -182,7 +182,7 @@ for (a in 1:length(all_pollutant_province)){
 }
 
 #Special Ozone treatment for city data
-air_data <- o3_city
+air_data <- O3_city
 trans <- data.frame(t(air_data[2:length(air_data)]))
 names(trans) <- air_data$id
 date <- data.frame(rownames(trans))
@@ -208,7 +208,7 @@ colnames(sp2_city) <- as.character(unlist(sp2_city[1, ]))
 sp2_city <- sp2_city[-1, ]
 
 #Special Ozone treatment for province data
-air_data <- o3_province
+air_data <- O3_province
 trans <- data.frame(t(air_data[2:length(air_data)]))
 names(trans) <- air_data$id
 date <- data.frame(rownames(trans))

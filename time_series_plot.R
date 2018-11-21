@@ -22,8 +22,6 @@ percent <- function(x){
 files <- c(list.files(pattern = ".*(_policy_daily)+.csv"), list.files(pattern = ".*(_province_daily)+.csv"))
 #set up pollutant scopes
 pollutants <- c("PM2.5", "PM10", "SO2", "NO2", "CO", "O3")
-winter_action_plan <- data.frame(x1 = , x2 = , y1 = -Inf, y2 = +Inf,
-                                 period = "Winter Action Plan")
 
 
 #Read all tables in as variables for further subsetting

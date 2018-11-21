@@ -78,7 +78,6 @@ for (a in 1:length(pollutants)){
   temp_city <- data.frame(t(temp_city[-1]))
   assign(paste(pollutants[a], "city", sep = "_"), temp_city)
   temp_province <- eval(parse(text = paste(pollutants[a], "province", sep = "_")))
-  temp_province <- temp_province[-1, ]
   rownames(temp_province) <- temp_province$id
   temp_province <- data.frame(t(temp_province[-1]))
   assign(paste(pollutants[a], "province", sep = "_"), temp_province)
