@@ -8,7 +8,6 @@ library(ggplot2)
 library(reshape2)
 library(tidyverse)
 library(tidyquant)
-library(ggpubr)
 library(wesanderson)
 
 setwd("/Users/sherry/Desktop/china_air/data")
@@ -89,11 +88,11 @@ names(month_moving) <- c("Date", "Area", rev(pollutants))
 month_moving <- melt(month_moving, id.vars = c("Date", "Area"), measure.vars = pollutants) %>%
   tibble::as.tibble() %>% 
   #subset the needed plots
-  filter(., Area %in% c("JJJ", "PRD", "YRD", "Fenwei") & !is.na(value))
+  filter(., Area %in% c("JJJ", "PRD", "YRD", "Fenwei", "National") & !is.na(value))
 
 #Set up the periodic highlights according to policies
-highlight <- data.frame(x1 = c(as.Date("2017-11-15"), as.Date("2018-10-01")), 
-                        x2 = c(as.Date("2018-03-15"), as.Date("2019-03-31")), 
+highlight <- data.frame(x1 = c(as.Date("2017-10-01"), as.Date("2018-10-01")), 
+                        x2 = c(as.Date("2018-03-31"), as.Date("2019-03-31")), 
                          y1 = c(-Inf, -Inf), y2 = c(+Inf, +Inf), period = "Winter Action Plan")
 
 #plots with period highlight
@@ -147,6 +146,8 @@ ggplot() +
 #year on year monthly moving average for PM2.5
 month_moving %>% 
   filter(., variable == "PM2.5") %>% 
+  #filter winter
+  #filter(., month(Date) >= 10 | month(Date) <= 3) %>%
   select(Date, Area, value) %>%
   mutate(year = factor(year(Date)),
          plotdate = as.Date(paste("2014", month(Date), day(Date), sep = "-"))) %>%

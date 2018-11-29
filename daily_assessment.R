@@ -49,6 +49,7 @@ for (a in 1:length(files)){
            merge(temp_province, pollution_province, by.x = "id", by.y = "Group.1", all.x = TRUE, all.y = TRUE))
     b = b+1
   }
+  
   #Evlaute O3_8h max
   pollution <- air_data[air_data$type == "O3_8h", ]
   pollution <- pollution[c(-1, -2, -3)]

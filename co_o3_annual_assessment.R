@@ -8,18 +8,19 @@
 
 setwd("/Users/sherry/Desktop/china_air/data")
 
-files <- c(list.files(pattern = "(CO)+.*.csv"), list.files(pattern = "(O3)+.*.csv"))
-a = 1
-for (a in 1:length(files)){
-  assign(gsub("_daily.csv", "", files[a]), read.csv(files[a]))
-  a = a+1
-}
-
 #function that gets the nth percentile
 #NAs are excluded from the list
 nthmax <- function(array, n = 90){
   place = round((100-n)/100 * length(array[!is.na(array)])) + 1
   return(sort(array[2:length(array)], decreasing = TRUE)[place])
+}
+
+files <- c(list.files(pattern = "(CO)+.*(_daily)+.csv"), list.files(pattern = "(O3)+.*(_daily)+.csv"))
+
+a = 1
+for (a in 1:length(files)){
+  assign(gsub("_daily.csv", "", files[a]), read.csv(files[a]))
+  a = a+1
 }
 
 #Transform data frame and get nth max from the list
